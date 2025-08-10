@@ -14,9 +14,12 @@ public class DeviceService {
 
     private final DeviceRepository deviceRepository;
 
-    public Device create(final Device newDevice) {
+    public Device create(final Device device) {
         // The specification could provide which device state is appropriated in this use case
-        return deviceRepository.save(newDevice.createNew());
+        var newDevice = device.createNew();
+        var savedDevice = deviceRepository.save(newDevice);
+        log.info("New device saved: " + savedDevice.getId());
+        return savedDevice;
     }
 
     public Device update(final Device toBeUpdatedDevice, final DeviceId deviceId) {
@@ -37,6 +40,7 @@ public class DeviceService {
                     .state(toBeUpdatedDevice.getState() == null ? dbDevice.getState() : toBeUpdatedDevice.getState())
                     .build();
         }
+        log.info("Device updated " + updatedDevice.getId());
         return deviceRepository.save(updatedDevice);
     }
 
@@ -59,6 +63,6 @@ public class DeviceService {
         }
 
         deviceRepository.delete(device.getId());
-
+        log.info("Device deleted: " + device.getId());
     }
 }
