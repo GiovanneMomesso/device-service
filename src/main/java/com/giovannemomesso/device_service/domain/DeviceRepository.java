@@ -12,5 +12,5 @@ public interface DeviceRepository {
 
     Optional<Device> findById(DeviceId id);
 
-    List<Device> findAll();
+    List<Device> findAll(String brand, DeviceState deviceState);
 }

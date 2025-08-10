@@ -213,9 +213,9 @@ public class DeviceServiceTest {
                 Device.builder().build(),
                 Device.builder().build());
 
-        when(deviceRepository.findAll()).thenReturn(devices);
+        when(deviceRepository.findAll(null, null)).thenReturn(devices);
 
-        var response = deviceService.getAll();
+        var response = deviceService.getAll(null, null);
 
         assertThat(response).hasSize(3);
     }

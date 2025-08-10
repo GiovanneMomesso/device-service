@@ -188,4 +188,107 @@ public class DeviceControllerIntegrationTest {
                 .andExpect(jsonPath("$[1].name").value("device 2"));
     }
 
+    @Test
+    void getAllDevices_givenBrandParam_shouldReturnAllDevicesForBrand() throws Exception {
+        var createDeviceRequest = DeviceRequest.builder()
+                .name("device 1")
+                .brand("brand 1")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createDeviceRequest1 = DeviceRequest.builder()
+                .name("device 2")
+                .brand("brand 2")
+                .state(DeviceState.AVAILABLE.getDescription())
+                .build();
+
+        var createStringResponse1 = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest1)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse1 = objectMapper.readValue(createStringResponse1, DeviceResponse.class);
+
+        var createDeviceRequest2 = DeviceRequest.builder()
+                .name("device 3")
+                .brand("brand 2")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        var createStringResponse2 = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest2)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse2 = objectMapper.readValue(createStringResponse2, DeviceResponse.class);
+
+
+        mockMvc.perform(get("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .param("brand", "brand 2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(createResponse1.getId()))
+                .andExpect(jsonPath("$[0].name").value("device 2"))
+                .andExpect(jsonPath("$[1].id").value(createResponse2.getId()))
+                .andExpect(jsonPath("$[1].name").value("device 3"));
+    }
+
+    @Test
+    void getAllDevices_givenStateParam_shouldReturnAllDevicesForBrand() throws Exception {
+        var createDeviceRequest = DeviceRequest.builder()
+                .name("device 1")
+                .brand("brand 1")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        var createStringResponse = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse = objectMapper.readValue(createStringResponse, DeviceResponse.class);
+
+        var createDeviceRequest1 = DeviceRequest.builder()
+                .name("device 2")
+                .brand("brand 2")
+                .state(DeviceState.AVAILABLE.getDescription())
+                .build();
+
+        mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest1)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+
+        var createDeviceRequest2 = DeviceRequest.builder()
+                .name("device 3")
+                .brand("brand 2")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        var createStringResponse2 = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest2)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse2 = objectMapper.readValue(createStringResponse2, DeviceResponse.class);
+
+
+        mockMvc.perform(get("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .param("state", "in-use"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(createResponse.getId()))
+                .andExpect(jsonPath("$[0].name").value("device 1"))
+                .andExpect(jsonPath("$[1].id").value(createResponse2.getId()))
+                .andExpect(jsonPath("$[1].name").value("device 3"));
+    }
+
 }

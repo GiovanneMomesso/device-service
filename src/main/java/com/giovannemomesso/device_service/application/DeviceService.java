@@ -40,7 +40,7 @@ public class DeviceService {
                 .orElseThrow(() -> new DeviceNotFoundException(deviceId));
     }
 
-    public List<Device> getAll() {
-        return deviceRepository.findAll();
+    public List<Device> getAll(String brand, DeviceState state) {
+        return deviceRepository.findAll(brand, state);
     }
 }

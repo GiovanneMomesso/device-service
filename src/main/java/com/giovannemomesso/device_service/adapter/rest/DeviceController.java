@@ -4,6 +4,7 @@ import com.giovannemomesso.device_service.adapter.rest.dto.DeviceRequest;
 import com.giovannemomesso.device_service.adapter.rest.dto.DeviceResponse;
 import com.giovannemomesso.device_service.application.DeviceService;
 import com.giovannemomesso.device_service.domain.DeviceId;
+import com.giovannemomesso.device_service.domain.DeviceState;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,9 +56,11 @@ public class DeviceController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<DeviceResponse>> getAllDevices() {
+    public ResponseEntity<List<DeviceResponse>> getAllDevices(@RequestParam(required = false) String brand, @RequestParam(required = false) String state) {
 
-        var devices = deviceService.getAll();
+        var deviceState = DeviceState.fromDescription(state);
+
+        var devices = deviceService.getAll(brand, deviceState);
 
         var devicesResponse = devices.stream().map(DeviceResponse::fromDomain).toList();
 

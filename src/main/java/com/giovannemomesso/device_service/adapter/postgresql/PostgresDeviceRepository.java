@@ -3,6 +3,7 @@ package com.giovannemomesso.device_service.adapter.postgresql;
 import com.giovannemomesso.device_service.domain.Device;
 import com.giovannemomesso.device_service.domain.DeviceId;
 import com.giovannemomesso.device_service.domain.DeviceRepository;
+import com.giovannemomesso.device_service.domain.DeviceState;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -26,7 +27,8 @@ public class PostgresDeviceRepository implements DeviceRepository {
     }
 
     @Override
-    public List<Device> findAll() {
-        return deviceCrudRepository.findAll();
+    public List<Device> findAll(final String brand, final DeviceState deviceState) {
+
+        return deviceCrudRepository.findAllFiltered(brand, deviceState);
     }
 }
