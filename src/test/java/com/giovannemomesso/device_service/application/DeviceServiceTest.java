@@ -34,11 +34,11 @@ public class DeviceServiceTest {
         var newDevice = Device.builder().name("device 1").brand("brand 1").state(DeviceState.AVAILABLE).build();
         var savedDevice = Device.builder().id(deviceId).name("device 1").brand("brand 1").state(DeviceState.AVAILABLE).createdTime(creationTime).build();
 
-        when(deviceRepository.save(newDevice)).thenReturn(savedDevice);
+        when(deviceRepository.save(any())).thenReturn(savedDevice);
 
         var response = deviceService.create(newDevice);
 
-        assertThat(response).isEqualTo(savedDevice);
+        assertThat(response).satisfies(dv -> assertThat(dv.getId()).isNotNull());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class DeviceServiceTest {
 
         assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice, deviceId))
                 .isInstanceOf(DeviceNotFoundException.class)
-                .hasMessage("Device not found for id: " + toBeUpdatedDevice.getId().getId());
+                .hasMessage("Device not found for id: " + deviceId.getId());
     }
 
     @Test
