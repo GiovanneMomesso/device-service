@@ -32,4 +32,9 @@ public class DeviceService {
         }
         throw new UpdateDeviceException(deviceId);
     }
+
+    public Device getById(final DeviceId deviceId) {
+        return deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
+    }
 }

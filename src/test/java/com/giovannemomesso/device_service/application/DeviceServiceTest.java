@@ -175,4 +175,35 @@ public class DeviceServiceTest {
                 .hasMessage("Update of in-use devices are not allowed. Device Id: " + toBeUpdatedDevice.getId().getId());
     }
 
+    @Test
+    void getDeviceById_givenValidId_shouldReturnDevice() {
+        var deviceId = DeviceId.createNew();
+        var createdTime = LocalDateTime.now();
+
+        var dbDevice = Device.builder()
+                .state(DeviceState.IN_USE)
+                .name("device")
+                .brand("brand")
+                .id(deviceId)
+                .createdTime(createdTime)
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+
+        var response = deviceService.getById(deviceId);
+
+        assertThat(response).isEqualTo(dbDevice);
+    }
+
+    @Test
+    void getDeviceById_givenNonExistingDevice_shouldThrowDeviceNotFoundException() {
+        var deviceId = DeviceId.createNew();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> deviceService.getById(deviceId))
+                .isInstanceOf(DeviceNotFoundException.class)
+                .hasMessage("Device not found for id: " + deviceId.getId());
+    }
+
 }

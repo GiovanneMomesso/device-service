@@ -41,4 +41,15 @@ public class DeviceController {
         return ResponseEntity.ok(deviceResponse);
     }
 
+    @GetMapping(value = "/{deviceId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<DeviceResponse> getDeviceById(@PathVariable("deviceId") String id) {
+        var deviceId = DeviceId.fromString(id);
+
+        var device = deviceService.getById(deviceId);
+
+        var deviceResponse = DeviceResponse.fromDomain(device);
+
+        return ResponseEntity.ok(deviceResponse);
+    }
+
 }

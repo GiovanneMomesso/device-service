@@ -3,6 +3,7 @@ package com.giovannemomesso.device_service.adapter.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.giovannemomesso.device_service.adapter.rest.dto.DeviceRequest;
 import com.giovannemomesso.device_service.adapter.rest.dto.DeviceResponse;
+import com.giovannemomesso.device_service.domain.DeviceState;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,8 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,7 +34,7 @@ public class DeviceControllerIntegrationTest {
         var createDeviceRequest = DeviceRequest.builder()
                 .name("device 1")
                 .brand("brand 1")
-                .state("available")
+                .state(DeviceState.AVAILABLE.getDescription())
                 .build();
 
         mockMvc.perform(post("/devices")
@@ -42,7 +44,7 @@ public class DeviceControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("device 1"))
                 .andExpect(jsonPath("$.brand").value("brand 1"))
-                .andExpect(jsonPath("$.state").value("available"))
+                .andExpect(jsonPath("$.state").value(DeviceState.AVAILABLE.getDescription()))
                 .andExpect(jsonPath("$.createdTime").exists());
 
     }
@@ -52,7 +54,7 @@ public class DeviceControllerIntegrationTest {
         var createDeviceRequest = DeviceRequest.builder()
                 .name("device 1")
                 .brand("brand 1")
-                .state("available")
+                .state(DeviceState.AVAILABLE.getDescription())
                 .build();
 
         var createStringResponse = mockMvc.perform(post("/devices")
@@ -65,7 +67,7 @@ public class DeviceControllerIntegrationTest {
         var patchRequest = DeviceRequest.builder()
                 .name("device 2")
                 .brand("brand new")
-                .state("in-use")
+                .state(DeviceState.IN_USE.getDescription())
                 .build();
 
         mockMvc.perform(patch("/devices/" + createResponse.getId())
@@ -75,7 +77,7 @@ public class DeviceControllerIntegrationTest {
                 .andExpect(jsonPath("$.id").value(createResponse.getId()))
                 .andExpect(jsonPath("$.name").value("device 2"))
                 .andExpect(jsonPath("$.brand").value("brand new"))
-                .andExpect(jsonPath("$.state").value("in-use"))
+                .andExpect(jsonPath("$.state").value(DeviceState.IN_USE.getDescription()))
                 .andExpect(jsonPath("$.createdTime").exists());
 
     }
@@ -85,7 +87,7 @@ public class DeviceControllerIntegrationTest {
         var createDeviceRequest = DeviceRequest.builder()
                 .name("device 1")
                 .brand("brand 1")
-                .state("in-use")
+                .state(DeviceState.IN_USE.getDescription())
                 .build();
 
         var createStringResponse = mockMvc.perform(post("/devices")
@@ -98,7 +100,7 @@ public class DeviceControllerIntegrationTest {
         var patchRequest = DeviceRequest.builder()
                 .name("device 2")
                 .brand("brand new")
-                .state("available")
+                .state(DeviceState.AVAILABLE.getDescription())
                 .build();
         mockMvc.perform(patch("/devices/" + createResponse.getId())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -106,6 +108,44 @@ public class DeviceControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("Update of in-use devices are not allowed. Device Id: " + createResponse.getId()));
+
+    }
+
+    @Test
+    void getDeviceById_givenValidId_shouldReturnDevice() throws Exception {
+        var createDeviceRequest = DeviceRequest.builder()
+                .name("device 1")
+                .brand("brand 1")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        var createStringResponse = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse = objectMapper.readValue(createStringResponse, DeviceResponse.class);
+
+        mockMvc.perform(get("/devices/" + createResponse.getId())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(createResponse.getId()))
+                .andExpect(jsonPath("$.name").value("device 1"))
+                .andExpect(jsonPath("$.brand").value("brand 1"))
+                .andExpect(jsonPath("$.state").value(DeviceState.IN_USE.getDescription()))
+                .andExpect(jsonPath("$.createdTime").exists());
+    }
+
+    @Test
+    void getDeviceById_givenInvalidId_shouldReturnBadRequest() throws Exception {
+
+        var randomId = UUID.randomUUID();
+
+        mockMvc.perform(get("/devices/" + randomId)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Device not found for id: " + randomId));
 
     }
 
