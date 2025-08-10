@@ -40,3 +40,9 @@ Runs the **PostgreSQL database** using Docker Compose:
 ```bash
    docker-compose -f docker-compose.db.yml up -d --build
 ```
+
+## 📖 API Documentation
+
+Once the application is running, you can access the API documentation via Swagger UI at:
+
+http://localhost:8080/swagger-ui.html
