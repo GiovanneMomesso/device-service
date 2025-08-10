@@ -1,15 +1,21 @@
 package com.giovannemomesso.device_service.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Builder(toBuilder = true)
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Device {
 
     @EmbeddedId
@@ -24,7 +30,7 @@ public class Device {
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    private Instant createdTime;
+    private LocalDateTime createdTime;
 
     public Boolean canUpdate() {
         return !DeviceState.IN_USE.equals(state);

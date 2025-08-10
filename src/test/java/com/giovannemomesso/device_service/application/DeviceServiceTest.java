@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +27,7 @@ public class DeviceServiceTest {
 
     @Test
     void createNewDevice_givenDevice_shouldReturnNewDevice() {
-        var creationTime = Instant.now();
+        var creationTime = LocalDateTime.now();
         var deviceId = DeviceId.createNew();
         var newDevice = Device.builder().name("device 1").brand("brand 1").state(DeviceState.AVAILABLE).build();
         var savedDevice = Device.builder().id(deviceId).name("device 1").brand("brand 1").state(DeviceState.AVAILABLE).createdTime(creationTime).build();
@@ -42,7 +42,7 @@ public class DeviceServiceTest {
     @Test
     void updateDevice_givenValidDevice_shouldReturnUpdatedDevice() {
         var deviceId = DeviceId.createNew();
-        var createdTime = Instant.now();
+        var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .state(DeviceState.INACTIVE)
                 .name("device 1")
@@ -77,7 +77,7 @@ public class DeviceServiceTest {
     @Test
     void updateDevice_givenValidDeviceWithOnlyState_shouldReturnUpdatedOnlyDeviceState() {
         var deviceId = DeviceId.createNew();
-        var createdTime = Instant.now();
+        var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .state(DeviceState.INACTIVE)
                 .id(deviceId)
@@ -110,7 +110,7 @@ public class DeviceServiceTest {
     @Test
     void updateDevice_givenValidDeviceWithOnlyName_shouldReturnUpdatedOnlyDeviceName() {
         var deviceId = DeviceId.createNew();
-        var createdTime = Instant.now();
+        var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .name("new device name")
                 .id(deviceId)
@@ -158,7 +158,7 @@ public class DeviceServiceTest {
     @Test
     void updateDevice_givenNotInvalidStateDevice_shouldThrowUpdateDeviceException() {
         var deviceId = DeviceId.createNew();
-        var createdTime = Instant.now();
+        var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .name("new device name")
                 .state(DeviceState.AVAILABLE)
