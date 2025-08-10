@@ -1,3 +1,12 @@
 spring:
   application:
     name: device-service
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/device-db"
+    username: "device-user"
+    password: "mypassword"
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: true

@@ -25,8 +25,8 @@ repositories {
 
 dependencies {
 	// db
-	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	//implementation 'org.flywaydb:flyway-database-postgresql'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.flywaydb:flyway-database-postgresql'
 	runtimeOnly 'org.postgresql:postgresql'
 
 	//web server

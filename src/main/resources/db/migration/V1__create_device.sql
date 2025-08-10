@@ -1,0 +1,8 @@
+CREATE TABLE device
+(
+    id UUID PRIMARY KEY NOT NULL,
+    name VARCHAR,
+    brand VARCHAR,
+    state VARCHAR,
+    created_time TIMESTAMP WITHOUT TIME ZONE NOT NULL
+)

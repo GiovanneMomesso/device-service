@@ -14,9 +14,12 @@ public class Device {
     private DeviceId id;
 
     private String name;
+
     private String brand;
+
     @Enumerated(EnumType.STRING)
-    private DeviceState deviceState;
+    private DeviceState state;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant createdTime;
