@@ -2,6 +2,7 @@ package com.giovannemomesso.device_service.domain;
 
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -11,4 +12,5 @@ public interface DeviceRepository {
 
     Optional<Device> findById(DeviceId id);
 
+    List<Device> findAll();
 }

@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -204,6 +205,19 @@ public class DeviceServiceTest {
         assertThatThrownBy(() -> deviceService.getById(deviceId))
                 .isInstanceOf(DeviceNotFoundException.class)
                 .hasMessage("Device not found for id: " + deviceId.getId());
+    }
+
+    @Test
+    void getAllDevices_shouldReturnAllDevices() {
+        var devices = List.of(Device.builder().build(),
+                Device.builder().build(),
+                Device.builder().build());
+
+        when(deviceRepository.findAll()).thenReturn(devices);
+
+        var response = deviceService.getAll();
+
+        assertThat(response).hasSize(3);
     }
 
 }

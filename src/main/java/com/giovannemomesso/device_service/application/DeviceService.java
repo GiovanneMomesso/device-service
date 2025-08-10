@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -36,5 +38,9 @@ public class DeviceService {
     public Device getById(final DeviceId deviceId) {
         return deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new DeviceNotFoundException(deviceId));
+    }
+
+    public List<Device> getAll() {
+        return deviceRepository.findAll();
     }
 }

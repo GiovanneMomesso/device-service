@@ -149,4 +149,43 @@ public class DeviceControllerIntegrationTest {
 
     }
 
+    @Test
+    void getAllDevices_shouldReturnAllDevices() throws Exception {
+        var createDeviceRequest = DeviceRequest.builder()
+                .name("device 1")
+                .brand("brand 1")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        var createStringResponse = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse = objectMapper.readValue(createStringResponse, DeviceResponse.class);
+
+        var createDeviceRequest1 = DeviceRequest.builder()
+                .name("device 2")
+                .brand("brand 2")
+                .state(DeviceState.AVAILABLE.getDescription())
+                .build();
+
+        var createStringResponse1 = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest1)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse1 = objectMapper.readValue(createStringResponse1, DeviceResponse.class);
+
+
+        mockMvc.perform(get("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(createResponse.getId()))
+                .andExpect(jsonPath("$[0].name").value("device 1"))
+                .andExpect(jsonPath("$[1].id").value(createResponse1.getId()))
+                .andExpect(jsonPath("$[1].name").value("device 2"));
+    }
+
 }

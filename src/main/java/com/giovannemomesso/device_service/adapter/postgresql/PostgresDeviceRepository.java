@@ -6,6 +6,7 @@ import com.giovannemomesso.device_service.domain.DeviceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,5 +23,10 @@ public class PostgresDeviceRepository implements DeviceRepository {
     @Override
     public Optional<Device> findById(final DeviceId id) {
         return deviceCrudRepository.findById(id);
+    }
+
+    @Override
+    public List<Device> findAll() {
+        return deviceCrudRepository.findAll();
     }
 }

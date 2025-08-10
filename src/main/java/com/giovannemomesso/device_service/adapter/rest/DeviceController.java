@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequestMapping("/devices")
 @RestController
 @AllArgsConstructor
@@ -50,6 +52,16 @@ public class DeviceController {
         var deviceResponse = DeviceResponse.fromDomain(device);
 
         return ResponseEntity.ok(deviceResponse);
+    }
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<DeviceResponse>> getAllDevices() {
+
+        var devices = deviceService.getAll();
+
+        var devicesResponse = devices.stream().map(DeviceResponse::fromDomain).toList();
+
+        return ResponseEntity.ok(devicesResponse);
     }
 
 }
