@@ -31,4 +31,9 @@ public class PostgresDeviceRepository implements DeviceRepository {
 
         return deviceCrudRepository.findAllFiltered(brand, deviceState);
     }
+
+    @Override
+    public void delete(final DeviceId deviceId) {
+        deviceCrudRepository.deleteById(deviceId);
+    }
 }

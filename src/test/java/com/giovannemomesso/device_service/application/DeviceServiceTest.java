@@ -14,6 +14,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -153,13 +154,14 @@ public class DeviceServiceTest {
     }
 
     @Test
-    void updateDevice_givenNotInvalidStateDevice_shouldThrowUpdateDeviceException() {
+    void updateDevice_givenInUseState_shouldUpdateOnlyState() {
         var deviceId = DeviceId.createNew();
         var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .name("new device name")
-                .state(DeviceState.AVAILABLE)
+                .state(DeviceState.INACTIVE)
                 .build();
+
 
         var dbDevice = Device.builder()
                 .state(DeviceState.IN_USE)
@@ -170,10 +172,18 @@ public class DeviceServiceTest {
                 .build();
 
         when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+        when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice, deviceId))
-                .isInstanceOf(UpdateDeviceException.class)
-                .hasMessage("Update of in-use devices are not allowed. Device Id: " + toBeUpdatedDevice.getId().getId());
+        var updatedDevice = deviceService.update(toBeUpdatedDevice, deviceId);
+
+        assertThat(updatedDevice)
+                .satisfies(ud -> {
+                    assertThat(ud.getName()).hasToString("device");
+                    assertThat(ud.getBrand()).hasToString("brand");
+                    assertThat(ud.getState()).isEqualTo(DeviceState.INACTIVE);
+                    assertThat(ud.getId()).isEqualTo(deviceId);
+                    assertThat(ud.getCreatedTime()).isEqualTo(createdTime);
+                });
     }
 
     @Test
@@ -218,6 +228,39 @@ public class DeviceServiceTest {
         var response = deviceService.getAll(null, null);
 
         assertThat(response).hasSize(3);
+    }
+
+    @Test
+    void deleteDevice_givenValidIdAndState_shouldDeleteDevice() {
+        var deviceId = DeviceId.createNew();
+        var dbDevice = Device.builder()
+                .id(deviceId)
+                .state(DeviceState.AVAILABLE)
+                .name("device 1")
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+
+        deviceService.deleteDevice(deviceId);
+
+        verify(deviceRepository).delete(deviceId);
+    }
+
+    @Test
+    void deleteDevice_givenExistingDeviceAndInvalidState_shouldThrowDeviceDeleteNotAllowedException() {
+        var deviceId = DeviceId.createNew();
+
+        var dbDevice = Device.builder()
+                .id(deviceId)
+                .state(DeviceState.IN_USE)
+                .name("device 1")
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+
+        assertThatThrownBy(() -> deviceService.deleteDevice(deviceId))
+                .isInstanceOf(DeviceDeleteNotAllowedException.class)
+                .hasMessage("In use devices can not be deleted. Device Id: " + deviceId.getId());
     }
 
 }

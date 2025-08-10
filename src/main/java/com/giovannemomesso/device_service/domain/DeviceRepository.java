@@ -13,4 +13,6 @@ public interface DeviceRepository {
     Optional<Device> findById(DeviceId id);
 
     List<Device> findAll(String brand, DeviceState deviceState);
+
+    void delete(DeviceId id);
 }

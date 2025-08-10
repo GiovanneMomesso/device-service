@@ -32,8 +32,8 @@ public class Device {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTime;
 
-    public Boolean canUpdate() {
-        return !DeviceState.IN_USE.equals(state);
+    public Boolean isInUse() {
+        return DeviceState.IN_USE.equals(state);
     }
 
     public Device createNew() {

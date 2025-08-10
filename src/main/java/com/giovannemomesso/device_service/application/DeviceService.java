@@ -24,15 +24,20 @@ public class DeviceService {
         var dbDevice = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new DeviceNotFoundException(deviceId));
 
-        if (dbDevice.canUpdate()) {
-            var updatedDevice = dbDevice.toBuilder()
+        Device updatedDevice;
+
+        if (!dbDevice.isInUse()) {
+            updatedDevice = dbDevice.toBuilder()
                     .name(toBeUpdatedDevice.getName() == null ? dbDevice.getName() : toBeUpdatedDevice.getName())
                     .brand(toBeUpdatedDevice.getBrand() == null ? dbDevice.getBrand() : toBeUpdatedDevice.getBrand())
                     .state(toBeUpdatedDevice.getState() == null ? dbDevice.getState() : toBeUpdatedDevice.getState())
                     .build();
-            return deviceRepository.save(updatedDevice);
+        } else {
+            updatedDevice = dbDevice.toBuilder()
+                    .state(toBeUpdatedDevice.getState() == null ? dbDevice.getState() : toBeUpdatedDevice.getState())
+                    .build();
         }
-        throw new UpdateDeviceException(deviceId);
+        return deviceRepository.save(updatedDevice);
     }
 
     public Device getById(final DeviceId deviceId) {
@@ -42,5 +47,18 @@ public class DeviceService {
 
     public List<Device> getAll(String brand, DeviceState state) {
         return deviceRepository.findAll(brand, state);
+    }
+
+    public void deleteDevice(final DeviceId deviceId) {
+
+        var device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
+
+        if (device.isInUse()) {
+            throw new DeviceDeleteNotAllowedException(deviceId);
+        }
+
+        deviceRepository.delete(device.getId());
+
     }
 }

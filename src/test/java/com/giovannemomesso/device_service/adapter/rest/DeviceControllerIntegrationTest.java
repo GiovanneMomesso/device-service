@@ -83,7 +83,7 @@ public class DeviceControllerIntegrationTest {
     }
 
     @Test
-    void patchDevice_givenInvalidState_shouldReturnBadRequest() throws Exception {
+    void patchDevice_givenInUseState_shouldUpdateOnlyState() throws Exception {
         var createDeviceRequest = DeviceRequest.builder()
                 .name("device 1")
                 .brand("brand 1")
@@ -102,12 +102,16 @@ public class DeviceControllerIntegrationTest {
                 .brand("brand new")
                 .state(DeviceState.AVAILABLE.getDescription())
                 .build();
+
         mockMvc.perform(patch("/devices/" + createResponse.getId())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(patchRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value("Update of in-use devices are not allowed. Device Id: " + createResponse.getId()));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(createResponse.getId()))
+                .andExpect(jsonPath("$.name").value("device 1"))
+                .andExpect(jsonPath("$.brand").value("brand 1"))
+                .andExpect(jsonPath("$.state").value(DeviceState.AVAILABLE.getDescription()))
+                .andExpect(jsonPath("$.createdTime").exists());
 
     }
 
@@ -289,6 +293,59 @@ public class DeviceControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].name").value("device 1"))
                 .andExpect(jsonPath("$[1].id").value(createResponse2.getId()))
                 .andExpect(jsonPath("$[1].name").value("device 3"));
+    }
+
+    @Test
+    void deleteDevice_givenValidIdAndState_shouldDeleteDevice() throws Exception {
+        var createDeviceRequest = DeviceRequest.builder()
+                .name("device 1")
+                .brand("brand 1")
+                .state(DeviceState.AVAILABLE.getDescription())
+                .build();
+
+        var createStringResponse = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse = objectMapper.readValue(createStringResponse, DeviceResponse.class);
+
+        mockMvc.perform(delete("/devices/" + createResponse.getId())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void deleteDevice_givenInValidState_shouldReturnBadRequest() throws Exception {
+        var createDeviceRequest = DeviceRequest.builder()
+                .name("device 1")
+                .brand("brand 1")
+                .state(DeviceState.IN_USE.getDescription())
+                .build();
+
+        var createStringResponse = mockMvc.perform(post("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(createDeviceRequest)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        var createResponse = objectMapper.readValue(createStringResponse, DeviceResponse.class);
+
+        mockMvc.perform(delete("/devices/" + createResponse.getId())
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("In use devices can not be deleted. Device Id: " + createResponse.getId()));
+
+        mockMvc.perform(get("/devices")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("device 1"));
     }
 
 }
