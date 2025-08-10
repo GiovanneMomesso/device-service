@@ -1,9 +1,6 @@
 package com.giovannemomesso.device_service.application;
 
-import com.giovannemomesso.device_service.domain.Device;
-import com.giovannemomesso.device_service.domain.DeviceId;
-import com.giovannemomesso.device_service.domain.DeviceRepository;
-import com.giovannemomesso.device_service.domain.DeviceState;
+import com.giovannemomesso.device_service.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,8 +8,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +37,147 @@ public class DeviceServiceTest {
         var response = deviceService.create(newDevice);
 
         assertThat(response).isEqualTo(savedDevice);
+    }
+
+    @Test
+    void updateDevice_givenValidDevice_shouldReturnUpdatedDevice() {
+        var deviceId = DeviceId.createNew();
+        var createdTime = Instant.now();
+        var toBeUpdatedDevice = Device.builder()
+                .state(DeviceState.INACTIVE)
+                .name("device 1")
+                .brand("brand 1")
+                .id(deviceId)
+                .build();
+
+
+        var dbDevice = Device.builder()
+                .state(DeviceState.AVAILABLE)
+                .name("device")
+                .brand("brand")
+                .id(deviceId)
+                .createdTime(createdTime)
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+        when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updatedDevice = deviceService.update(toBeUpdatedDevice);
+
+        assertThat(updatedDevice)
+                .satisfies(ud -> {
+                    assertThat(ud.getName()).hasToString("device 1");
+                    assertThat(ud.getBrand()).hasToString("brand 1");
+                    assertThat(ud.getState()).isEqualTo(DeviceState.INACTIVE);
+                    assertThat(ud.getId()).isEqualTo(deviceId);
+                    assertThat(ud.getCreatedTime()).isEqualTo(createdTime);
+                });
+    }
+
+    @Test
+    void updateDevice_givenValidDeviceWithOnlyState_shouldReturnUpdatedOnlyDeviceState() {
+        var deviceId = DeviceId.createNew();
+        var createdTime = Instant.now();
+        var toBeUpdatedDevice = Device.builder()
+                .state(DeviceState.INACTIVE)
+                .id(deviceId)
+                .build();
+
+
+        var dbDevice = Device.builder()
+                .state(DeviceState.AVAILABLE)
+                .name("device")
+                .brand("brand")
+                .id(deviceId)
+                .createdTime(createdTime)
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+        when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updatedDevice = deviceService.update(toBeUpdatedDevice);
+
+        assertThat(updatedDevice)
+                .satisfies(ud -> {
+                    assertThat(ud.getName()).hasToString("device");
+                    assertThat(ud.getBrand()).hasToString("brand");
+                    assertThat(ud.getState()).isEqualTo(DeviceState.INACTIVE);
+                    assertThat(ud.getId()).isEqualTo(deviceId);
+                    assertThat(ud.getCreatedTime()).isEqualTo(createdTime);
+                });
+    }
+
+    @Test
+    void updateDevice_givenValidDeviceWithOnlyName_shouldReturnUpdatedOnlyDeviceName() {
+        var deviceId = DeviceId.createNew();
+        var createdTime = Instant.now();
+        var toBeUpdatedDevice = Device.builder()
+                .name("new device name")
+                .id(deviceId)
+                .build();
+
+
+        var dbDevice = Device.builder()
+                .state(DeviceState.AVAILABLE)
+                .name("device")
+                .brand("brand")
+                .id(deviceId)
+                .createdTime(createdTime)
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+        when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updatedDevice = deviceService.update(toBeUpdatedDevice);
+
+        assertThat(updatedDevice)
+                .satisfies(ud -> {
+                    assertThat(ud.getName()).hasToString("new device name");
+                    assertThat(ud.getBrand()).hasToString("brand");
+                    assertThat(ud.getState()).isEqualTo(DeviceState.AVAILABLE);
+                    assertThat(ud.getId()).isEqualTo(deviceId);
+                    assertThat(ud.getCreatedTime()).isEqualTo(createdTime);
+                });
+    }
+
+    @Test
+    void updateDevice_givenNotFoundDevice_shouldThrowDeviceNotFoundException() {
+        var deviceId = DeviceId.createNew();
+        var toBeUpdatedDevice = Device.builder()
+                .name("new device name")
+                .id(deviceId)
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice))
+                .isInstanceOf(DeviceNotFoundException.class)
+                .hasMessage("Device not found for id: " + toBeUpdatedDevice.getId().getId());
+    }
+
+    @Test
+    void updateDevice_givenNotInvalidStateDevice_shouldThrowUpdateDeviceException() {
+        var deviceId = DeviceId.createNew();
+        var createdTime = Instant.now();
+        var toBeUpdatedDevice = Device.builder()
+                .name("new device name")
+                .state(DeviceState.AVAILABLE)
+                .id(deviceId)
+                .build();
+
+        var dbDevice = Device.builder()
+                .state(DeviceState.IN_USE)
+                .name("device")
+                .brand("brand")
+                .id(deviceId)
+                .createdTime(createdTime)
+                .build();
+
+        when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
+
+        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice))
+                .isInstanceOf(UpdateDeviceException.class)
+                .hasMessage("Update of in-use devices are not allowed. Device Id: " + toBeUpdatedDevice.getId().getId());
     }
 
 }
