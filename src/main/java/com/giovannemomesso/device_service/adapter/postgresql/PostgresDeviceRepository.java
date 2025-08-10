@@ -1,0 +1,26 @@
+package com.giovannemomesso.device_service.adapter.postgresql;
+
+import com.giovannemomesso.device_service.domain.Device;
+import com.giovannemomesso.device_service.domain.DeviceId;
+import com.giovannemomesso.device_service.domain.DeviceRepository;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+@AllArgsConstructor
+public class PostgresDeviceRepository implements DeviceRepository {
+
+    private final DeviceCrudRepository deviceCrudRepository;
+
+    @Override
+    public Device save(final Device device) {
+        return deviceCrudRepository.save(device);
+    }
+
+    @Override
+    public Optional<Device> findById(final DeviceId id) {
+        return deviceCrudRepository.findById(id);
+    }
+}

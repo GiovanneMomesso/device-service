@@ -16,9 +16,8 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
 
     public Device create(final Device newDevice) {
-
         // The specification could provide which device state is appropriated in this use case
-        return deviceRepository.save(newDevice);
+        return deviceRepository.save(newDevice.createNew());
     }
 
     public Device update(final Device toBeUpdatedDevice) {
@@ -34,8 +33,6 @@ public class DeviceService {
                     .build();
             return deviceRepository.save(updatedDevice);
         }
-
         throw new UpdateDeviceException(toBeUpdatedDevice);
     }
-
 }

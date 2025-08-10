@@ -30,4 +30,13 @@ public class Device {
         return !DeviceState.IN_USE.equals(state);
     }
 
+    public Device createNew() {
+        return Device.builder()
+                .id(DeviceId.createNew())
+                .name(name)
+                .brand(brand)
+                .state(state)
+                .build();
+    }
+
 }
