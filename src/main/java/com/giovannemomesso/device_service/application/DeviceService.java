@@ -40,7 +40,7 @@ public class DeviceService {
                     .state(toBeUpdatedDevice.getState() == null ? dbDevice.getState() : toBeUpdatedDevice.getState())
                     .build();
         }
-        log.info("Device updated " + updatedDevice.getId());
+        log.info("Device updated: " + updatedDevice.getId());
         return deviceRepository.save(updatedDevice);
     }
 
