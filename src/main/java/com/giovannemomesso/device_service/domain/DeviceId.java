@@ -16,4 +16,8 @@ public class DeviceId {
     private UUID id;
 
     public static DeviceId createNew() {return new DeviceId(UUID.randomUUID());}
+
+    public static DeviceId fromString(String id) {
+        return new DeviceId(UUID.fromString(id));
+    }
 }

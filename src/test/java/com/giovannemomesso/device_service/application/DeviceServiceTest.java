@@ -47,7 +47,6 @@ public class DeviceServiceTest {
                 .state(DeviceState.INACTIVE)
                 .name("device 1")
                 .brand("brand 1")
-                .id(deviceId)
                 .build();
 
 
@@ -62,7 +61,7 @@ public class DeviceServiceTest {
         when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
         when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var updatedDevice = deviceService.update(toBeUpdatedDevice);
+        var updatedDevice = deviceService.update(toBeUpdatedDevice, deviceId);
 
         assertThat(updatedDevice)
                 .satisfies(ud -> {
@@ -80,7 +79,6 @@ public class DeviceServiceTest {
         var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .state(DeviceState.INACTIVE)
-                .id(deviceId)
                 .build();
 
 
@@ -95,7 +93,7 @@ public class DeviceServiceTest {
         when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
         when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var updatedDevice = deviceService.update(toBeUpdatedDevice);
+        var updatedDevice = deviceService.update(toBeUpdatedDevice, deviceId);
 
         assertThat(updatedDevice)
                 .satisfies(ud -> {
@@ -113,7 +111,6 @@ public class DeviceServiceTest {
         var createdTime = LocalDateTime.now();
         var toBeUpdatedDevice = Device.builder()
                 .name("new device name")
-                .id(deviceId)
                 .build();
 
 
@@ -128,7 +125,7 @@ public class DeviceServiceTest {
         when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
         when(deviceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var updatedDevice = deviceService.update(toBeUpdatedDevice);
+        var updatedDevice = deviceService.update(toBeUpdatedDevice, deviceId);
 
         assertThat(updatedDevice)
                 .satisfies(ud -> {
@@ -145,12 +142,11 @@ public class DeviceServiceTest {
         var deviceId = DeviceId.createNew();
         var toBeUpdatedDevice = Device.builder()
                 .name("new device name")
-                .id(deviceId)
                 .build();
 
         when(deviceRepository.findById(deviceId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice))
+        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice, deviceId))
                 .isInstanceOf(DeviceNotFoundException.class)
                 .hasMessage("Device not found for id: " + toBeUpdatedDevice.getId().getId());
     }
@@ -162,7 +158,6 @@ public class DeviceServiceTest {
         var toBeUpdatedDevice = Device.builder()
                 .name("new device name")
                 .state(DeviceState.AVAILABLE)
-                .id(deviceId)
                 .build();
 
         var dbDevice = Device.builder()
@@ -175,7 +170,7 @@ public class DeviceServiceTest {
 
         when(deviceRepository.findById(deviceId)).thenReturn(Optional.of(dbDevice));
 
-        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice))
+        assertThatThrownBy(() -> deviceService.update(toBeUpdatedDevice, deviceId))
                 .isInstanceOf(UpdateDeviceException.class)
                 .hasMessage("Update of in-use devices are not allowed. Device Id: " + toBeUpdatedDevice.getId().getId());
     }

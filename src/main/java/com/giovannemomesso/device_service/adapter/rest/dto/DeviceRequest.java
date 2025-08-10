@@ -1,4 +1,4 @@
-package com.giovannemomesso.device_service.adapter.dto;
+package com.giovannemomesso.device_service.adapter.rest.dto;
 
 import com.giovannemomesso.device_service.domain.Device;
 import com.giovannemomesso.device_service.domain.DeviceState;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class CreateDeviceRequest {
+public class DeviceRequest {
     private String name;
     private String brand;
     private String state;

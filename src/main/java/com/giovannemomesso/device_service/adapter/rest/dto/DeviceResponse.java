@@ -1,4 +1,4 @@
-package com.giovannemomesso.device_service.adapter.dto;
+package com.giovannemomesso.device_service.adapter.rest.dto;
 
 import com.giovannemomesso.device_service.domain.Device;
 import lombok.Builder;

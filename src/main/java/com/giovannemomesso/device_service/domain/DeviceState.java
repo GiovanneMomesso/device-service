@@ -15,7 +15,7 @@ public enum DeviceState {
 
     public static DeviceState fromDescription(String description) {
         if (!StringUtils.hasText(description)) {
-            throw new IllegalArgumentException("Empty device state");
+            return null;
         }
         for (var deviceState : values()) {
             if (deviceState.getDescription().equalsIgnoreCase(description)) {

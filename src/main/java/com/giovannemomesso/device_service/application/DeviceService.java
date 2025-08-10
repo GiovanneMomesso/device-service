@@ -1,9 +1,6 @@
 package com.giovannemomesso.device_service.application;
 
-import com.giovannemomesso.device_service.domain.Device;
-import com.giovannemomesso.device_service.domain.DeviceNotFoundException;
-import com.giovannemomesso.device_service.domain.DeviceRepository;
-import com.giovannemomesso.device_service.domain.UpdateDeviceException;
+import com.giovannemomesso.device_service.domain.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,10 +17,10 @@ public class DeviceService {
         return deviceRepository.save(newDevice.createNew());
     }
 
-    public Device update(final Device toBeUpdatedDevice) {
+    public Device update(final Device toBeUpdatedDevice, final DeviceId deviceId) {
 
-        var dbDevice = deviceRepository.findById(toBeUpdatedDevice.getId())
-                .orElseThrow(() -> new DeviceNotFoundException(toBeUpdatedDevice.getId()));
+        var dbDevice = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new DeviceNotFoundException(deviceId));
 
         if (dbDevice.canUpdate()) {
             var updatedDevice = dbDevice.toBuilder()
@@ -33,6 +30,6 @@ public class DeviceService {
                     .build();
             return deviceRepository.save(updatedDevice);
         }
-        throw new UpdateDeviceException(toBeUpdatedDevice);
+        throw new UpdateDeviceException(deviceId);
     }
 }
